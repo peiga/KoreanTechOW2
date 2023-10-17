@@ -55,7 +55,7 @@ namespace OW {
 						entity.Alive = (entity.PlayerHealth > 0.f) ? true : false;
 					}
 					if (entity.RotationBase) {
-						entity.Rot = SDK->RPM<Vector3>(SDK->RPM<uint64_t>(entity.RotationBase + 0x7C0) + 0x8FC);
+						entity.Rot = SDK->RPM<Vector3>(SDK->RPM<uint64_t>(entity.RotationBase + 0x7D0) + 0x8FC);
 					}
 					if (entity.VelocityBase) {
 						velo_compo = SDK->RPM<velocity_compo_t>(entity.VelocityBase);
@@ -481,7 +481,7 @@ namespace OW {
 				if (Config::Tracking) {
 					while (GetAsyncKeyState(Config::aim_key))
 					{
-						auto vec = GetVector3(Config::Prediction ? true : false);
+						auto vec = GetVector3(Config::Prediction);
 						if (vec != Vector3(0, 0, 0)) {
 							auto local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x12A0);
 							auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), viewMatrix_xor.get_location());
