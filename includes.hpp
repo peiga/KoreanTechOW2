@@ -44,6 +44,8 @@
 #include "Vector.hpp"
 #include "Renderer.hpp"
 
+#include "IDAdefs.h"
+
 /* Lib */
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "winhttp.lib")
@@ -201,10 +203,19 @@ namespace OW {
 		DWORD_PTR AngleBase;
 		DWORD_PTR EnemyAngleBase;
 		DWORD_PTR ObjectBase;
+		DWORD_PTR NameBase;
 		DWORD_PTR HeroID;
-		int head_index = 0;
 		uint32_t PlayerID;
 		uint16_t Dva;
+
+		uint32_t BorderType;
+		uint32_t BorderColor;
+
+		char* HeroName;
+		char* BattleTag;
+		char* PlayerName;
+
+		int head_index = 0;
 
 		float PlayerHealth = 0.f;
 		float PlayerHealthMax = 0.f;
@@ -246,6 +257,96 @@ namespace OW {
 			else if (bitTeam[0x1B])
 				return eTeam::TEAM_DEATHMATCH;
 		}
+
+		uint64_t __fastcall get_outline_struct(__int64 a1) //40 53 48 83 EC 30 65 48 8B 04 25 ? ? ? ? 48
+		{
+			__int64 v2; // rcx
+			int v4; // er9
+			v2 = SDK->RPM<int>(a1 + 0x68);
+			if ((_DWORD)v2)
+				return  (uint64_t)(0x20 * v2 + SDK->RPM<_QWORD>(a1 + 0x60) - 0x20i64);
+			else
+				return 0i64;
+		}
+
+		uint64_t __fastcall get_color_struct(__int64 a1) //40 57 48 83 EC 20 44 8B 91
+		{
+			__int64 v2; // rax
+
+			v2 = SDK->RPM<int>(a1 + 0xF8);
+			if ((_DWORD)v2)
+				return (SDK->RPM<_QWORD>(a1 + 0xF0) + 0x14 * v2 - 0x14);
+			else
+				return 0i64;
+		}
+
+		uint64_t __fastcall decrypt_outline_xor(__int64 a1)
+		{
+			__int64 v1; // rbx
+			unsigned __int64 v2; // rdi
+			unsigned __int64 v3; // rax
+			__int64 v4; // rbx
+			unsigned __int64 v5; // rdx
+			unsigned __int64 v6; // rcx
+			__m128i v7; // xmm1
+			__m128i v8; // xmm2
+			__m128i v9; // xmm0
+			__m128i v10; // xmm1
+
+			v2 = SDK->dwGameBase + offset::Outline_Fn;
+			v3 = v2 + 0x8;
+
+			uint64_t keys = SDK->dwGameBase + 0x37451C0 + 8 * (((_BYTE)a1 - 0x1F) & 0x7F);
+			v4 = v2 ^ SDK->RPM<DWORD_PTR>(keys
+				+ (((unsigned __int64)(a1 + offset::Outline_Key) >> 7) & 7)) ^ (a1 + offset::Outline_Key);
+
+			v5 = (v3 - v2 + 7) >> 3;
+			v6 = 0i64;
+			if (v2 > v3)
+				v5 = 0i64;
+			if (v5)
+			{
+				if (v5 >= 4)
+				{
+					v7 = {};
+					v8 = {};
+					do
+					{
+						v6 += 4i64;
+						v7 = _mm_xor_si128(v7, _mm_loadu_si128((const __m128i*)v2));
+						v9 = _mm_loadu_si128((const __m128i*)(v2 + 16));
+						v2 += 0x20i64;
+						v8 = _mm_xor_si128(v8, v9);
+					} while (v6 < (v5 & 0xFFFFFFFFFFFFFFFCui64));
+					v10 = _mm_xor_si128(v7, v8);
+					__m128i P1 = _mm_xor_si128(v10, _mm_srli_si128(v10, 8));
+					v4 ^= *(DWORD_PTR*)&P1;
+				}
+				for (; v6 < v5; ++v6)
+				{
+					v4 ^= SDK->RPM<DWORD_PTR>(v2);
+					v2 += 8i64;
+				}
+			}
+			return v4 ^ ~v3 ^ offset::Outline_Key;
+		}
+
+		void SetBorderLine(uint32_t BorderType, uint32_t BorderColor)
+		{
+			if (BorderType) {
+				uint64_t BorderStruct = get_outline_struct((uint64_t)this->OutlineBase + 0x20);
+				uint64_t DecryptData = decrypt_outline_xor(SDK->RPM<uint64_t>(BorderStruct + 0x18));
+				uint32_t data = DecryptData ^ BorderType;
+				SDK->WPM<uint32_t>(BorderStruct + 0x10, data);
+			}
+
+			if (BorderColor)
+			{
+				uint64_t Color = get_color_struct(this->OutlineBase + 0x20);
+				SDK->WPM<uint32_t>(Color + 0x10, BorderColor);
+			}
+		}
+
 
 		int get_bone_id(uint64_t bonedata, int bone_id) {
 			__try {

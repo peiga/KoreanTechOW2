@@ -38,6 +38,8 @@ namespace OW {
 					entity.VisBase = DecryptComponent(LinkParent, TYPE_P_VISIBILITY);
 					entity.AngleBase = DecryptComponent(LinkParent, TYPE_PLAYERCONTROLLER);
 					entity.EnemyAngleBase = DecryptComponent(ComponentParent, TYPE_ANGLE);
+					//entity.NameBase = DecryptComponent(LinkParent, TYPE_NAME);
+
 					health_compo_t health_compo{};
 					velocity_compo_t velo_compo{};
 					hero_compo_t hero_compo{};
@@ -67,6 +69,7 @@ namespace OW {
 					if (entity.HeroBase) {
 						hero_compo = SDK->RPM<hero_compo_t>(entity.HeroBase);
 						entity.HeroID = hero_compo.heroid;
+						entity.HeroName = GetHeroNames(entity.HeroID, entity.LinkBase).data();
 					}
 					if (entity.VisBase) {
 						vis_compo = SDK->RPM<vis_compo_t>(entity.VisBase);
@@ -74,6 +77,23 @@ namespace OW {
 					}
 					if (entity.TeamBase) {
 						entity.Team = (entity.GetTeam() == eTeam::TEAM_DEATHMATCH || entity.GetTeam() != local_entity.GetTeam()) ? true : false;
+					}
+					if (entity.NameBase) {
+						uintptr_t off = SDK->RPM<uintptr_t>(entity.NameBase + 0xE0);
+						char buffer[64];
+						SDK->read_buf(off, buffer, sizeof(char) * 64);
+						entity.BattleTag = buffer;
+						entity.PlayerName = strtok(entity.BattleTag, "#");
+					}
+
+					if (entity.OutlineBase) {
+						uint32_t color = entity.Team ? 0xFF0000FF : 0xFFFF0000;
+						if (entity.Vis)
+							color = entity.Team ? 0xFF00FF00 : 0xFFFFFF00;
+
+						uint32_t border = entity.Alive ? 2 : 0;
+
+						entity.SetBorderLine(border, color);
 					}
 
 					const auto angle_component = DecryptComponent(LinkParent, TYPE_PLAYERCONTROLLER);
@@ -112,7 +132,7 @@ namespace OW {
 			for (c_entity entity : entities) {
 				if (entity.Alive && entity.Team && local_entity.PlayerHealth > 0) {
 					Vector3 Vec3 = entity.head_pos; // 일단 원래대로 돌렸음
-					float dist = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z).DistTo(Vec3);
+					float dist = local_entity.head_pos.DistTo(Vec3);
 					Vector2 Vec2_A{}, Vec2_B{};
 					if (!viewMatrix.WorldToScreen(Vector3(Vec3.X, Vec3.Y + 1.f, Vec3.Z), &Vec2_A, Vector2(WX, WY)))
 						continue;

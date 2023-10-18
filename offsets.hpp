@@ -14,5 +14,7 @@ namespace OW {
 		constexpr auto offset_viewmatrix_xor_key = 0x3CBCE717692D66C9;
 		constexpr auto Visible_Fn = 0x766B32;
 		constexpr auto Visible_Key = 0x6DCC9774568624AF;
+		constexpr auto Outline_Fn = 0x76F822;
+		constexpr auto Outline_Key = 0x78E5108E826510E1;
 	}
 }
