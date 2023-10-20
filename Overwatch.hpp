@@ -119,7 +119,8 @@ namespace OW {
 				WX = WindowSize.X;
 				WY = WindowSize.Y;
 				viewMatrix = SDK->RPM<Matrix>(viewMatrixPtr);
-				viewMatrix_xor = SDK->RPM<Matrix>(viewMatrix_xor_ptr);
+				//viewMatrix_xor = SDK->RPM<Matrix>(viewMatrix_xor_ptr);
+				viewMatrix_xor = viewMatrix;
 				Sleep(5);
 			}
 		}

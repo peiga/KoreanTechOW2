@@ -181,9 +181,9 @@ namespace OW {
 		v1 = a1;
 		v2 = SDK->dwGameBase + offset::Visible_Fn;
 		v3 = v2 + 0x8;
-		v4 = SDK->RPM<uint64_t>(SDK->dwGameBase + 0x37451C0
-			+ 8 * (((uint8_t)a1 + 0x51) & 0x7F)
-			+ (((uint64_t)(a1 - offset::Visible_Key) >> 7) & 7)) ^ v2 ^ (a1 - offset::Visible_Key);
+		v4 = SDK->RPM<uint64_t>(SDK->dwGameBase + 0x3720340
+			+ 8 * (((uint8_t)a1 + 0x59) & 0x7F)
+			+ (((uint64_t)(a1 + offset::Visible_Key) >> 7) & 7)) ^ v2 ^ (a1 + offset::Visible_Key);
 		v5 = (v3 - v2 + 7) >> 3;
 		v6 = 0i64;
 		if (v2 > v3)
@@ -208,8 +208,9 @@ namespace OW {
 			v4 ^= SDK->RPM<uintptr_t>(v2);
 			v2 += 8i64;
 		}
-		return v4 ^ ~v3 ^ 0x9233688BA979DB51;
+		return v4 ^ ~v3 ^ offset::Visible_Key;
 	}
+
 
 	inline uintptr_t DecryptComponent(uintptr_t parent, uint8_t idx) {
 		__try {
@@ -225,11 +226,12 @@ namespace OW {
 				unsigned __int64 v9 = SDK->RPM<uintptr_t>((SDK->RPM<uintptr_t>((v1 + 0x70)) + 8 * (SDK->RPM<uint8_t>(((uint32_t)v5 + v1 + 0x120)) + ((0x101010101010101 * (((v8 & 0x3333333333333333) + ((v8 >> 2) & 0x3333333333333333) + (((v8 & 0x3333333333333333) + ((v8 >> 2) & 0x3333333333333333)) >> 4)) & 0xF0F0F0F0F0F0F0F)) >> 0x38))));
 				unsigned __int64 Key1 = SDK->GlobalKey1;
 				unsigned __int64 Key2 = SDK->GlobalKey2;
-				unsigned __int64 dummy = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x37441A0 + (Key1 >> 0x34));
-				unsigned __int64 dummy2 = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x37441A0 + (Key1 & 0xFFF));
-				unsigned __int64 v10 = Key2 ^ ((unsigned int)v9 | ((unsigned int)v9 | v9 & 0xFFFFFFFF00000000ui64 ^ (((unsigned int)v9 ^ 0xFFFFFFFFAE692641ui64) << 0x20)) & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)((unsigned int)v9 ^ (unsigned int)~HIDWORD(dummy)) << 0x20));
-				unsigned __int64 v11 = -(int)v7 & ((unsigned int)v10 | ((unsigned int)v10 | v10 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)((unsigned int)dummy2 - (unsigned int)v10) << 0x20)) & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)((unsigned int)v10 ^ 0x51DD7F1) << 0x20));
-				return v11;
+				unsigned __int64 dummy = SDK->RPM<unsigned __int64>(SDK->dwGameBase + 0x371F320 + (Key1 >> 0x34));
+				unsigned __int64 dummy2 = SDK->RPM<unsigned __int64>(SDK->dwGameBase + 0x371F320 + (Key1 & 0xFFF));
+				unsigned __int64 v10 = Key2 ^ ((unsigned int)v9 | ((unsigned int)v9 | v9 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(0x75DD35E8 - (unsigned int)v9) << 0x20)) & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(2 * __ROR4__(HIDWORD(dummy), 3) - (unsigned int)v9) << 0x20));
+				unsigned __int64 v11 = (unsigned int)v10 | v10 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)((unsigned int)v10 ^ ~(unsigned int)dummy2) << 0x20);
+				unsigned __int64 v12 = -(int)v7 & ((unsigned int)v11 | v11 & 0xFFFFFFFF00000000ui64 ^ (((unsigned int)v11 ^ 0xFFFFFFFFAF1B1482ui64) << 0x20));
+				return v12;
 			}
 		}
 		__except (EXCEPTION_EXECUTE_HANDLER) {}
@@ -237,11 +239,11 @@ namespace OW {
 	}
 
 	inline uintptr_t GetHeapManager(uint8_t index) {
-		uintptr_t v0 = SDK->RPM<uintptr_t>((SDK->dwGameBase + offset::HeapManager));
+		uintptr_t v0 = SDK->RPM<uintptr_t>(SDK->dwGameBase + offset::HeapManager);
 		if (v0 != 0) {
-			auto v1 = SDK->RPM<uintptr_t>(v0 + offset::HeapManager_Pointer) ^ SDK->RPM<uintptr_t>(SDK->dwGameBase + offset::HeapManager_Var) ^ offset::HeapManager_Key;
+			auto v1 = SDK->RPM<uintptr_t>(v0 + offset::HeapManager_Pointer) ^ (offset::HeapManager_Key - _rotr64(SDK->RPM<uintptr_t>(SDK->dwGameBase + offset::HeapManager_Var), 0x0C));
 			if (v1 != 0) {
-				uintptr_t v2 = SDK->RPM<uintptr_t>((v1 + 0x8 * index));
+				uintptr_t v2 = SDK->RPM<uintptr_t>(v1 + 0x8 * index);
 				return v2;
 			}
 		}

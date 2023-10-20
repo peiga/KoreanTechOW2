@@ -296,9 +296,9 @@ namespace OW {
 			v2 = SDK->dwGameBase + offset::Outline_Fn;
 			v3 = v2 + 0x8;
 
-			uint64_t keys = SDK->dwGameBase + 0x37451C0 + 8 * (((_BYTE)a1 - 0x1F) & 0x7F);
+			uint64_t keys = SDK->dwGameBase + 0x3720340 + 8 * (((_BYTE)a1 - 0x76) & 0x7F);
 			v4 = v2 ^ SDK->RPM<DWORD_PTR>(keys
-				+ (((unsigned __int64)(a1 + offset::Outline_Key) >> 7) & 7)) ^ (a1 + offset::Outline_Key);
+				+ (((unsigned __int64)(a1 - offset::Outline_Key) >> 7) & 7)) ^ (a1 - offset::Outline_Key);
 
 			v5 = (v3 - v2 + 7) >> 3;
 			v6 = 0i64;
@@ -328,8 +328,9 @@ namespace OW {
 					v2 += 8i64;
 				}
 			}
-			return v4 ^ ~v3 ^ offset::Outline_Key;
+			return v4 ^ ~v3 ^ 0x0B156B2D970B05A8A;
 		}
+
 
 		void SetBorderLine(uint32_t BorderType, uint32_t BorderColor)
 		{

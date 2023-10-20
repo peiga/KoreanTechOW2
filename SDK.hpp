@@ -62,7 +62,7 @@ namespace OW {
 				uint64_t Key = FindPatternExReg(key_sig, key_mask, 0x100000) - 0x70;
 				if (Key && Key < 0xf000000000000000 && RPM<uint64_t>(Key + 0x10) > 0x1000000000000000 && RPM<uint64_t>(Key + 0x28) > 0x1000000000000000) {
 					GlobalKey1 = RPM<uint64_t>(Key + 0x18);
-					GlobalKey2 = RPM<uint64_t>(Key + 0x28);
+					GlobalKey2 = RPM<uint64_t>(Key + 0x20);
 					cout << endl;
 					cout << "GlobalKey1: 0x" << hex << GlobalKey1 << endl;
 					cout << "GlobalKey2: 0x" << hex << GlobalKey2 << endl;
