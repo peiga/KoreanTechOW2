@@ -11,6 +11,7 @@ namespace OW {
 		float predit_level = 115.f; // ¼ÒÀü 160.f
 		
 		bool Flick = false;
+		bool InstaFlick = false;
 		bool Tracking = false;
 		bool Prediction = false;
 		bool hanzo_flick = false;

@@ -398,6 +398,10 @@ namespace OW {
 								ImGui::Checkbox(skCrypt("Prediction"), &Config::Prediction);
 							}
 							ImGui::Checkbox(skCrypt("Flick"), &Config::Flick);
+							if (Config::Flick) {
+								ImGui::Separator();
+								ImGui::Checkbox(skCrypt("InstaFlick"), &Config::InstaFlick);
+							}
 							ImGui::Checkbox(skCrypt("Hanzo bot"), &Config::hanzo_flick);
 							if (Config::hanzo_flick || Config::Prediction) {
 								ImGui::Separator();
@@ -488,7 +492,7 @@ namespace OW {
 	inline void aimbot_thread()
 	{
 		__try {
-			Vector2 CrossHair = Vector2(GetSystemMetrics(SM_CXSCREEN) / 2.0f, GetSystemMetrics(SM_CYSCREEN) / 2.0f);
+			Vector2 CrossHair = Vector2(WX / 2.0f, WY / 2.0f);
 			while (true) {
 				static float origin_sens = 0.f;
 				if (SDK->RPM<float>(GetSenstivePTR()))
@@ -505,10 +509,9 @@ namespace OW {
 						auto vec = GetVector3(Config::Prediction);
 						if (vec != Vector3(0, 0, 0)) {
 							auto local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x12A0);
-							auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), viewMatrix_xor.get_location());
+							auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), XMFLOAT3(local_entity.head_pos.X, local_entity.head_pos.Y, local_entity.head_pos.Z));
 							auto vec_calc_target = Vector3(calc_target.x, calc_target.y, calc_target.z);
 							auto Target = SmoothLinear(local_angle, vec_calc_target, Config::Tracking_smooth / 10.f);
-							auto local_loc = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z);
 
 							if (Target != Vector3(0, 0, 0)) {
 								SDK->WPM<Vector3>(SDK->g_player_controller + 0x12A0, Target);
@@ -518,21 +521,20 @@ namespace OW {
 					}
 				}
 				//Flick
-				else if (Config::Flick) {
+				else if (Config::Flick && !Config::InstaFlick) {
 					while (GetAsyncKeyState(Config::aim_key))
 					{
 						if (!shooted) {
 							auto vec = GetVector3(false);
 							if (vec != Vector3(0, 0, 0)) {
 								auto local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x12A0);
-								auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), viewMatrix_xor.get_location());
+								auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), XMFLOAT3(local_entity.head_pos.X, local_entity.head_pos.Y, local_entity.head_pos.Z));
 								auto vec_calc_target = Vector3(calc_target.x, calc_target.y, calc_target.z);
 								auto Target = SmoothAccelerate(local_angle, vec_calc_target, Config::Flick_smooth / 10.f, 75.0f / 100.0f);
-								auto local_loc = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z);
 
 								if (Target != Vector3(0, 0, 0)) {
 									SDK->WPM<Vector3>(SDK->g_player_controller + 0x12A0, Target);
-									if (in_range(local_angle, vec_calc_target, local_loc, vec, Config::hitbox)) {
+									if (in_range(local_angle, vec_calc_target, local_entity.head_pos, vec, Config::hitbox)) {
 										SDK->WPM<float>(GetSenstivePTR(), 0);
 										SetKey(0x1);
 										SDK->WPM<float>(GetSenstivePTR(), origin_sens);
@@ -544,6 +546,30 @@ namespace OW {
 						Sleep(1);
 					}
 				}
+				//InstaFlick
+				else if (Config::Flick && Config::InstaFlick) {
+					while (GetAsyncKeyState(Config::aim_key))
+					{
+						if (!shooted) {
+							auto vec = GetVector3(false);
+							if (vec != Vector3(0, 0, 0)) {
+								auto local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x12A0);
+								auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), XMFLOAT3(local_entity.head_pos.X, local_entity.head_pos.Y, local_entity.head_pos.Z));
+								auto Target = Vector3(calc_target.x, calc_target.y, calc_target.z);
+
+								if (Target != Vector3(0, 0, 0) && in_range(local_angle, Target, local_entity.head_pos, vec, Config::Fov)) {
+									SDK->WPM<Vector3>(SDK->g_player_controller + 0x12A0, Target);
+									SetKey(0x1);
+									Sleep(10);
+									SDK->WPM<Vector3>(SDK->g_player_controller + 0x12A0, local_angle);
+									shooted = true;
+								}
+							}
+						}
+						Sleep(1);
+					}
+				}
+
 				else if (Config::hanzo_flick)
 				{
 					while (GetAsyncKeyState(Config::aim_key))
@@ -554,10 +580,10 @@ namespace OW {
 							{
 
 								auto local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x12A0);
-								auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), viewMatrix_xor.get_location());
+								auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), XMFLOAT3(local_entity.head_pos.X, local_entity.head_pos.Y, local_entity.head_pos.Z));
 								auto vec_calc_target = Vector3(calc_target.x, calc_target.y, calc_target.z);
 								auto Target = SmoothAccelerate(local_angle, vec_calc_target, Config::Flick_smooth / 10.f, 75.0f / 100.0f); // 탄낙 어디에있음 
-								auto local_loc = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z);
+								auto local_loc = local_entity.head_pos;
 
 								if (Target != Vector3(0, 0, 0))
 								{

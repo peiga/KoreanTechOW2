@@ -91,7 +91,6 @@ namespace OW {
 		return Result;
 	}
 
-
 	float GetLookUpSkill(uint16_t a1) // for get Hanzo's Projectile Speed
 	{
 		__try
@@ -115,7 +114,7 @@ namespace OW {
 	{
 		int TarGetIndex = -1;
 		Vector3 target{};
-		Vector2 CrossHair = Vector2(GetSystemMetrics(SM_CXSCREEN) / 2.0f, GetSystemMetrics(SM_CYSCREEN) / 2.0f);
+		Vector2 CrossHair = Vector2(WX / 2.0f, WY / 2.0f);
 
 		float origin = 100000.f;
 

@@ -8,6 +8,26 @@ namespace OW {
 		std::vector<MEMORY_BASIC_INFORMATION64> mbis;
 		bool CompressMbis = false;
 
+		typedef NTSTATUS(NTAPI* _NtQueryInformationProcess)(
+			HANDLE ProcessHandle,
+			DWORD ProcessInformationClass,
+			PVOID ProcessInformation,
+			DWORD ProcessInformationLength,
+			PDWORD ReturnLength
+		);
+
+		inline PVOID GetPebAddress(HANDLE ProcessHandle)
+		{
+			_NtQueryInformationProcess NtQueryInformationProcess =
+				(_NtQueryInformationProcess)GetProcAddress(
+					GetModuleHandleA("ntdll.dll"), "NtQueryInformationProcess");
+			PROCESS_BASIC_INFORMATION pbi;
+
+			NtQueryInformationProcess(ProcessHandle, 0, &pbi, sizeof(pbi), NULL);
+
+			return pbi.PebBaseAddress;
+		}
+
 		inline uintptr_t GetModuleBaseAddress(DWORD procId, const char* modName)
 		{
 			uintptr_t modBaseAddr = 0;
@@ -34,7 +54,8 @@ namespace OW {
 	public:
 		HANDLE hProcess = 0;
 		uint64_t dwGameBase = 0;
-		uint64_t GlobalKey1 = 0, GlobalKey2 = 0;
+		int64_t GlobalKey1 = 0x606AAC7FA498ACDFi64;
+		int64_t GlobalKey2 = 0x275BEA8775DD35E8i64;
 		uint64_t g_player_controller = 0;
 		size_t SectionSize;
 	public:
@@ -55,7 +76,28 @@ namespace OW {
 			return dwGameBase;
 		}
 
+		/*
+		* This function is unique for every Game Client.
+		* Find your own and the bot will start faster.
+		* 
+		inline void GetKeys(__int64* a1, __int64* a2)
+		{
+			_NtQueryInformationProcess NtQueryInformationProcess =
+				(_NtQueryInformationProcess)GetProcAddress(
+					GetModuleHandleA("ntdll.dll"), "NtQueryInformationProcess");
+			PROCESS_BASIC_INFORMATION pbi;
+
+			NtQueryInformationProcess(hProcess, 0, &pbi, sizeof(pbi), NULL);
+			uint64_t ProcessParameters = RPM<uintptr_t>((uintptr_t)pbi.PebBaseAddress + 0x20);
+
+			*a1 ^= 0xSOMEKEYi64 - __ROL8__(ProcessParameters, 9);
+			*(_QWORD*)a2 ^= 0xSOMEKEY2ui64;
+		}
+		*/
 		inline bool GetGlobalKey() {
+			//GetKeys(&GlobalKey2, &GlobalKey1);
+			//return true;
+
 			static auto key_sig = (BYTE*)"\x00\x00\x00\x00\x80\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x3f";
 			static auto key_mask = "x???xx?xx?????xxxxxx";
 			while (true) {

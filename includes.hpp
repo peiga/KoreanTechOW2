@@ -19,6 +19,7 @@
 #include <mutex>
 #include <array>
 #include <dwmapi.h>
+#include <Winternl.h>
 
 /* D3D SDK */
 #include <d3d11.h>
