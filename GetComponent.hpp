@@ -264,8 +264,10 @@ namespace OW {
 		std::vector<std::pair<uint64_t, uint64_t>> result{};
 
 		uintptr_t entity_list = SDK->RPM<uint64_t>(SDK->dwGameBase + offset::Address_entity_base);
+		MEMORY_BASIC_INFORMATION mbi{};
+		VirtualQueryEx(SDK->hProcess, (LPCVOID)entity_list, &mbi, sizeof(mbi));
 
-		for (size_t i = 0x00; i < SDK->SectionSize; i += 0x10)
+		for (size_t i = 0x00; i < mbi.RegionSize; i += 0x10)
 		{
 			uint64_t cur_entity = SDK->RPM<uint64_t>(entity_list + i);
 			if (!cur_entity)
@@ -275,7 +277,7 @@ namespace OW {
 				continue;
 			uint64_t common = 0;
 			uint32_t unique_id = SDK->RPM<uint32_t>(common_linker + 0xD4);
-			for (size_t o = 0x00; o < SDK->SectionSize; o += 0x10)
+			for (size_t o = 0x00; o < mbi.RegionSize; o += 0x10)
 			{
 				uint64_t ent = SDK->RPM<uint64_t>(entity_list + o);
 				if (!ent)
