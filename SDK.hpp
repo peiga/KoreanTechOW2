@@ -98,7 +98,7 @@ namespace OW {
 			//GetKeys(&GlobalKey2, &GlobalKey1);
 			//return true;
 
-			static auto key_sig = (BYTE*)"\x00\x00\x00\x00\x80\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x3f";
+			static auto key_sig = (BYTE*)"\x00\x00\x00\x00\x80\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x3f"; // 0 ?? ?? ?? 80 0 ?? 40 0 ?? ?? ?? ?? ?? 0 0 0 0 0 3F
 			static auto key_mask = "x???xx?xx?????xxxxxx";
 			while (true) {
 				uint64_t Key = FindPatternExReg(key_sig, key_mask, 0x100000) - 0x70;
